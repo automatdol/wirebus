@@ -2,7 +2,7 @@
 #+title: Wirebus
 #+author: Taejun Song
 
-* [[id:a24c38b1-c48a-4dab-8ce1-8bc228fe0506][wirebus]]
+* [[id:a24c38b1-c48a-4dab-8ce1-8bc228fe0506][Wirebus]]
 
 Building global cryptomarket monitoring system consisting of the Exchange Connector powered by Rust and dashboard with Django (python).
 Our system will receive and parse the most recent realtime tick data given by exchanges in the most efficient way possible.
@@ -21,3 +21,5 @@ The Wirebus dashboard will be used by both our own trading system and the public
 Therefore, we need to consider two different aspects. One is high performance and accuracy, and the other is ultimately, hopefully in the near future, the optimal way to handle network traffic problems.
 
 Our web dashboard server will be developed by Django, the python web framework.
+
+TEST
