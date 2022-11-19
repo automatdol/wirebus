@@ -4,19 +4,18 @@
 
 * [[id:a24c38b1-c48a-4dab-8ce1-8bc228fe0506][wirebus]]
 
+Building global cryptomarket monitoring system consisting of the Exchange Connector powered by Rust and dashboard with Django (python).
+Our system will receive and parse the most recent realtime tick data given by exchanges in the most efficient way possible.
+
+
+** [[id:fe110cd1-7155-48f3-a535-587ffb5968de][Connector]] (Rust)
+
 We try to connect websocket API's as long as exchanges support such feature.
 Then, with the raw data given, our goal is to build an optimized parser for each L1, L2, L3 orderbook, respectively.
 For the sake of high performance, we chose the Rust programming language as a data parser.
 Since it is crucial to manage the code efficiently, it is highly recommended to encapsulate the Rust module
 
-** Connector (Rust)
-
-We try to connect websocket API's as long as exchanges support such feature.
-Then, with the raw data given, our goal is to build an optimized parser for each L1, L2, L3 orderbook, respectively.
-For the sake of high performance, we chose the Rust programming language as a data parser.
-Since it is crucial to manage the code efficiently, it is highly recommended to encapsulate the Rust module
-
-** Dashboard (Django)
+** [[id:15d07819-341a-4e37-871f-f3ae893f9142][Dashboard]] (Django)
 
 The Wirebus dashboard will be used by both our own trading system and the public web service.
 Therefore, we need to consider two different aspects. One is high performance and accuracy, and the other is ultimately, hopefully in the near future, the optimal way to handle network traffic problems.
