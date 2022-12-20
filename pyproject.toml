@@ -3,11 +3,12 @@ name = "wirebus"
 version = "0.1.0"
 description = ""
 authors = ["taejun-song <songtj10@snu.ac.kr>"]
-readme = "README.md"
+readme = "README.org"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 django = "^4.1.4"
+channels = "^4.0.0"
 
 
 [build-system]
