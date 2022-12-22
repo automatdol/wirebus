@@ -85,7 +85,7 @@ CHANNEL_LAYERS = {
 
 
 WSGI_APPLICATION = "wirebus.wsgi.application"
-ASGI_APPLICATION = "wirebus.routing.application"
+ASGI_APPLICATION = "wirebus.asgi.application"
 
 
 # Database
