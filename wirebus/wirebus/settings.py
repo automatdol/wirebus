@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "channels",
     "dashapp.apps.DashappConfig",
     "django.contrib.admin",
