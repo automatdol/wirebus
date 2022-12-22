@@ -8,7 +8,7 @@ readme = "README.org"
 [tool.poetry.dependencies]
 python = "^3.10"
 django = "^4.1.4"
-channels = "^4.0.0"
+channels = {extras = ["daphne"], version = "^4.0.0"}
 celery = "^5.2.7"
 django-celery-beat = "^2.4.0"
 channels-redis = "^4.0.0"
