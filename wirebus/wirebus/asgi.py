@@ -13,7 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
 from django.urls import re_path
-from dashboard.routing import ws_pattern
+from .routing import ws_pattern
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wirebus.settings")
 

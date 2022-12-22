@@ -7,7 +7,6 @@ class TableData(AsyncWebsocketConsumer):
             self.group_name,
             self.channel_name
         )
-        await self.addToCeleryBeat()
         await self.accept()
 
     async def disconnect(self, close_code):
