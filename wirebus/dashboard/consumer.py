@@ -15,4 +15,13 @@ class TableData(AsyncWebsocketConsumer):
                                                self.channel_name)
 
     async def receive(self, text_data):
-        print(text_data)
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'randomFunction',
+                'value': text_data,
+            }
+        )
+
+    async def randomFunction(self, event):
+        await self.send(event['value'])
