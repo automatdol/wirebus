@@ -160,4 +160,4 @@ cython_debug/
 .idea/
 
 # Wirebus specific
-wirebus/templates/
+# wirebus/templates/
