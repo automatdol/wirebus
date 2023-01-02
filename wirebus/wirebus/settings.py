@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "js_lib_ag_grid_community",
     "daphne",
     "channels",
     "dashboard.apps.DashboardConfig",
@@ -136,7 +135,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = ["wirebus/static",]
+STATIC_ROOT = "static/root"
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR,"static")
+]
+
 
 
 # Default primary key field type
