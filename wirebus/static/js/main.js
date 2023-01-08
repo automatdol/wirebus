@@ -1,30 +1,21 @@
-var UPDATE_COUNT = 20;
+var fakeServer = new FakeServer();
 
 const columnDefs = [
-  // these are the row groups, so they are all hidden (they are show in the group column)
-  {
-    headerName: 'Product',
-    field: 'product',
-    hide: true,
-  },
-  {
-    headerName: 'Portfolio',
-    field: 'portfolio',
-    hide: true,
-  },
-  {
-    headerName: 'Book',
-    field: 'book',
-    hide: true,
-  },
-  { headerName: 'Trade', field: 'trade', width: 100 },
+  // keys
+  { field: 'productName', rowGroup: true, hide: true },
+  { field: 'portfolioName', rowGroup: true, hide: true },
+  { field: 'bookId', rowGroup: true, hide: true },
+
+  // {field: 'productId'},
+  // {field: 'portfolioId'},
+  // {field: 'bookId'},
 
   // all the other columns (visible and not grouped)
   {
     headerName: 'Current',
     field: 'current',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -32,24 +23,32 @@ const columnDefs = [
     headerName: 'Previous',
     field: 'previous',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
   {
     headerName: 'Deal Type',
     field: 'dealType',
+    filter: 'agSetColumnFilter',
+    filterParams: {
+      values: ['Financial', 'Physical'],
+    },
   },
   {
     headerName: 'Bid',
     field: 'bidFlag',
     width: 100,
+    filter: 'agSetColumnFilter',
+    filterParams: {
+      values: ['Buy', 'Sell'],
+    },
   },
   {
     headerName: 'PL 1',
     field: 'pl1',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -57,7 +56,7 @@ const columnDefs = [
     headerName: 'PL 2',
     field: 'pl2',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -65,7 +64,7 @@ const columnDefs = [
     headerName: 'Gain-DX',
     field: 'gainDx',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -73,7 +72,7 @@ const columnDefs = [
     headerName: 'SX / PX',
     field: 'sxPx',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -81,7 +80,7 @@ const columnDefs = [
     headerName: '99 Out',
     field: '_99Out',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -89,7 +88,7 @@ const columnDefs = [
     headerName: 'Submitter ID',
     field: 'submitterID',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
@@ -97,11 +96,89 @@ const columnDefs = [
     headerName: 'Submitted Deal ID',
     field: 'submitterDealID',
     width: 200,
-    cellClass: 'number',
+    type: 'numericColumn',
     valueFormatter: numberCellFormatter,
     cellRenderer: 'agAnimateShowChangeCellRenderer',
   },
 ];
+
+const gridOptions = {
+  asyncTransactionWaitMillis: 500,
+  purgeClosedRowNodes: true,
+  rowSelection: 'multiple',
+  columnDefs: columnDefs,
+  rowModelType: 'serverSide',
+  animateRows: true,
+  defaultColDef: {
+    width: 250,
+    resizable: true,
+    sortable: true,
+  },
+  autoGroupColumnDef: {
+    field: 'tradeId',
+  },
+  getRowId: getRowId,
+  isApplyServerSideTransaction: isApplyServerSideTransaction,
+  onAsyncTransactionsFlushed: onAsyncTransactionsFlushed,
+  onGridReady: (params) => {
+    var dataSource = {
+      getRows: (params2) => {
+        fakeServer.getData(
+          params2.request,
+          params2.parentNode.data,
+          function (result, serverVersion) {
+            params2.success({
+              rowData: result,
+              groupLevelInfo: { serverVersion: serverVersion },
+            });
+          }
+        );
+      },
+    };
+
+    params.api.setServerSideDatasource(dataSource);
+
+    var callback = processUpdateFromFakeServer.bind(window, params.api);
+
+    fakeServer.addUpdateListener(callback);
+  },
+};
+
+function getRowId(params) {
+  var data = params.data;
+  if (data.tradeId) {
+    return data.tradeId;
+  } else if (data.bookId) {
+    return data.bookId;
+  } else if (data.portfolioId) {
+    return data.portfolioId;
+  } else if (data.productId) {
+    return data.productId;
+  }
+}
+
+function isApplyServerSideTransaction(params) {
+  var transactionVersion = params.transaction.serverVersion;
+  var dataLoadedVersion = params.groupLevelInfo.serverVersion;
+  var transactionCreatedSinceInitialLoad =
+    transactionVersion > dataLoadedVersion;
+  if (!transactionCreatedSinceInitialLoad) {
+    console.log('cancelling transaction');
+  }
+  return transactionCreatedSinceInitialLoad;
+}
+
+function onAsyncTransactionsFlushed(e) {
+  var summary = {};
+  e.results.forEach((result) => {
+    var status = result.status;
+    if (summary[status] == null) {
+      summary[status] = 0;
+    }
+    summary[status]++;
+  });
+  console.log('onAsyncTransactionsFlushed: ' + JSON.stringify(summary));
+}
 
 function numberCellFormatter(params) {
   return Math.floor(params.value)
@@ -109,87 +186,36 @@ function numberCellFormatter(params) {
     .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
 }
 
-const gridOptions = {
-  columnDefs: columnDefs,
-  suppressAggFuncInHeader: true,
-  animateRows: true,
-  rowGroupPanelShow: 'always',
-  pivotPanelShow: 'always',
-  asyncTransactionWaitMillis: 4000,
-  getRowId: (params) => {
-    return params.data.trade;
-  },
-  defaultColDef: {
-    width: 120,
-    sortable: true,
-    resizable: true,
-  },
-  autoGroupColumnDef: {
-    width: 250,
-  },
-  onGridReady: (params) => {
-    getData();
-    params.api.setRowData(globalRowData);
-    startFeed(params.api);
-  },
-  onAsyncTransactionsFlushed: (e) => {
-    console.log(
-      '========== onAsyncTransactionsFlushed: applied ' +
-        e.results.length +
-        ' transactions'
-    );
-  },
-};
-
-function onFlushTransactions() {
-  gridOptions.api.flushAsyncTransactions();
+function onBtStart() {
+  fakeServer.startUpdates();
 }
 
-function startFeed(api) {
-  var count = 1;
+function onBtStop() {
+  fakeServer.stopUpdates();
+}
 
-  setInterval(function () {
-    var thisCount = count++;
-    var updatedIndexes = {};
-    var newItems = [];
-    for (var i = 0; i < UPDATE_COUNT; i++) {
-      // pick one index at random
-      var index = Math.floor(Math.random() * globalRowData.length);
-      // dont do same index twice, otherwise two updates for same row in one transaction
-      if (updatedIndexes[index]) {
-        continue;
+function onBtApplyOneTransaction() {
+  fakeServer.insertOneRecord();
+}
+
+function processUpdateFromFakeServer(gridApi, transactions) {
+  var updatingJustOneTransaction = transactions.length == 4;
+  if (updatingJustOneTransaction) {
+    console.log('Updating One Record');
+  }
+  transactions.forEach(function (tx) {
+    gridApi.applyServerSideTransactionAsync(tx, function (res) {
+      if (updatingJustOneTransaction) {
+        console.log(
+          'Route [' + (tx.route || []).join(',') + '], status = ' + res.status
+        );
       }
-      var itemToUpdate = globalRowData[index];
-      var newItem = copyObject(itemToUpdate);
-      // copy previous to current value
-      newItem.previous = newItem.current;
-      // then create new current value
-      newItem.current = Math.floor(Math.random() * 100000) + 100;
-      newItems.push(newItem);
-    }
-    var resultCallback = function () {
-      console.log('transactionApplied() - ' + thisCount);
-    };
-    api.applyTransactionAsync({ update: newItems }, resultCallback);
-    console.log('applyTransactionAsync() - ' + thisCount);
-  }, 500);
-}
-
-// makes a copy of the original and merges in the new values
-function copyObject(object) {
-  // start with new object
-  var newObject = {};
-
-  // copy in the old values
-  Object.keys(object).forEach(function (key) {
-    newObject[key] = object[key];
+    });
   });
-
-  return newObject;
 }
 
-// after page is loaded, create the grid.
+// setup the grid after the page has finished loading
 document.addEventListener('DOMContentLoaded', function () {
-  var eGridDiv = document.querySelector('#myGrid');
-  new agGrid.Grid(eGridDiv, gridOptions);
+  var gridDiv = document.querySelector('#myGrid');
+  new agGrid.Grid(gridDiv, gridOptions);
 });
