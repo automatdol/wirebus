@@ -13,6 +13,8 @@ celery = "^5.2.7"
 django-celery-beat = "^2.4.0"
 channels-redis = "^4.0.0"
 django-js-lib-ag-grid-community = "^25.3.0"
+websocket-client = "^1.4.2"
+websockets = "^10.4"
 
 
 [build-system]
